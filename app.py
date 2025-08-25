@@ -69,15 +69,15 @@ def load_pipeline(model_type: str, use_rag: bool) -> RAGPipeline:
     # Model configurations
     configs = {
         "base": {
-            "model_name": "Qwen/Qwen3-0.6B",
+            "model_name": "Qwen/Qwen3-8B",
             "adapter_path": None
         },
         "sft": {
-            "model_name": "Qwen/Qwen3-0.6B",
+            "model_name": "Qwen/Qwen3-8B",
             "adapter_path": "experiments/20250821_064206/sft_debug/final_model"
         },
         "dpo": {
-            "model_name": "Qwen/Qwen3-0.6B",
+            "model_name": "Qwen/Qwen3-8B",
             "adapter_path": None  # Update when DPO model is ready
         }
     }
