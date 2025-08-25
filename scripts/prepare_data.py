@@ -115,7 +115,7 @@ def main():
     
     # 2. 데이터셋 병합 (전체 데이터)
     print("전체 데이터셋 병합 중...")
-    full_dataset = merge_fixed_datasets(sample_limit=10000)  # 전체 데이터
+    full_dataset = merge_fixed_datasets(sample_limit=3000)  # 전체 데이터
     
     # 3. 학습/평가 데이터 분리
     print("\n학습/평가 데이터 분리 중...")

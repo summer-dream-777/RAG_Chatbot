@@ -88,11 +88,18 @@ class SFTTrainer:
         # Set padding token
         if self.tokenizer.pad_token is None:
             self.tokenizer.pad_token = self.tokenizer.eos_token
+
+        if self.config['training'].get('bf16'):
+            dtype = torch.bfloat16
+        elif self.config['training'].get('fp16'):
+            dtype = torch.float16
+        else:
+            dtype = torch.float32
             
         # Model loading arguments
         model_kwargs = {
             "trust_remote_code": True,
-            "torch_dtype": torch.float16 if self.config['training']['fp16'] else torch.float32,
+            "torch_dtype": dtype,
             "device_map": "auto"
         }
         
@@ -143,6 +150,8 @@ class SFTTrainer:
             per_device_train_batch_size=self.config['data']['train_batch_size'],
             per_device_eval_batch_size=self.config['data']['eval_batch_size'],
             gradient_accumulation_steps=self.config['training']['gradient_accumulation_steps'],
+            prediction_loss_only=self.config['training']['prediction_loss_only'],
+            eval_accumulation_steps=self.config['training']['eval_accumulation_steps'],
             learning_rate=float(self.config['training']['learning_rate']),
             warmup_ratio=self.config['training']['warmup_ratio'],
             lr_scheduler_type=self.config['training']['lr_scheduler_type'],
@@ -150,6 +159,7 @@ class SFTTrainer:
             # Optimization
             optim=self.config['training']['optim'],
             fp16=self.config['training']['fp16'],
+            bf16=self.config['training']['bf16'],
             gradient_checkpointing=self.config['training']['gradient_checkpointing'],
             
             # Logging and saving

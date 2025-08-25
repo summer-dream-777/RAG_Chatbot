@@ -87,17 +87,44 @@ class ModelInference:
 
 def load_test_data(data_source: str, max_samples: int = None) -> Dict[str, List[str]]:
     if data_source.endswith('.json'):
+        # Check if it's JSONL format (one JSON object per line)
         with open(data_source, 'r') as f:
-            data = json.load(f)
+            first_line = f.readline().strip()
+            f.seek(0)  # Reset file pointer to beginning
+            
+            try:
+                # Try to parse as regular JSON first
+                data = json.load(f)
+                prompts = data.get('instruction', data.get('prompt', data.get('question', [])))
+                references = data.get('response', data.get('answer', data.get('completion', [])))
+            except json.JSONDecodeError:
+                # If that fails, try JSONL format
+                prompts = []
+                references = []
+                f.seek(0)  # Reset file pointer again
+                for line in f:
+                    line = line.strip()
+                    if line:
+                        try:
+                            item = json.loads(line)
+                            instruction = item.get('instruction', item.get('prompt', item.get('question', '')))
+                            response = item.get('response', item.get('answer', item.get('completion', '')))
+                            if instruction and response:
+                                prompts.append(instruction)
+                                references.append(response)
+                        except json.JSONDecodeError:
+                            logger.warning(f"Skipping invalid JSON line: {line[:100]}...")
+                            continue
     elif data_source.endswith('.csv'):
         df = pd.read_csv(data_source)
         data = df.to_dict('list')
+        prompts = data.get('instruction', data.get('prompt', data.get('question', [])))
+        references = data.get('response', data.get('answer', data.get('completion', [])))
     else:
         dataset = load_dataset(data_source, split='test')
         data = {col: dataset[col] for col in dataset.column_names}
-    
-    prompts = data.get('instruction', data.get('prompt', data.get('question', [])))
-    references = data.get('response', data.get('answer', data.get('completion', [])))
+        prompts = data.get('instruction', data.get('prompt', data.get('question', [])))
+        references = data.get('response', data.get('answer', data.get('completion', [])))
     
     if not prompts or not references:
         raise ValueError("Could not find prompt/response columns in the data")

@@ -14,6 +14,29 @@ import json
 logger = logging.getLogger(__name__)
 
 
+def _sanitize_for_json(obj):
+    """Recursively convert numpy/torch types to Python-native types for JSON serialization."""
+    # numpy scalars
+    if isinstance(obj, np.generic):
+        return obj.item()
+    # numpy arrays
+    if isinstance(obj, np.ndarray):
+        return obj.tolist()
+    # torch tensors
+    if 'torch' in str(type(obj)):
+        try:
+            import torch  # local import to avoid hard dependency in type checks
+            if isinstance(obj, torch.Tensor):
+                return obj.detach().cpu().tolist()
+        except Exception:
+            pass
+    # containers
+    if isinstance(obj, dict):
+        return {k: _sanitize_for_json(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple, set)):
+        return [_sanitize_for_json(v) for v in obj]
+    return obj
+
 @dataclass
 class EvaluationResult:
     """Container for evaluation results"""
@@ -33,7 +56,7 @@ class EvaluationResult:
     def save(self, path: str):
         """Save results to JSON"""
         with open(path, 'w') as f:
-            json.dump(self.to_dict(), f, indent=2)
+            json.dump(_sanitize_for_json(self.to_dict()), f, indent=2)
 
 
 class CustomerSupportEvaluator:
