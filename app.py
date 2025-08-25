@@ -131,7 +131,7 @@ def main():
         - 📚 SFT: Supervised Fine-Tuning
         - 🎯 DPO: Direct Preference Optimization
         - 🗂️ Vector DB: 1000+ documents
-        - 🤖 Base Model: Qwen3-0.6B
+        - 🤖 Base Model: Qwen/Qwen3-8B
         """)
     
     # Main content - Tab layout
