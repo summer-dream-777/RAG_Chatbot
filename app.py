@@ -107,7 +107,7 @@ def main():
             "Select Model",
             ["base", "sft", "dpo"],
             format_func=lambda x: {
-                "base": "Base Qwen3-0.6B",
+                "base": "Base Qwen/Qwen3-8B",
                 "sft": "SFT Fine-tuned",
                 "dpo": "DPO Optimized"
             }[x]
